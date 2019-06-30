@@ -15,30 +15,98 @@ class BaseGraph:
         self.method = method
         self.nodes = []
         if self.method == 'adjacency_matrix':
-            self.adjacency_matrix = [[]]
+            self.adjacency_matrix = [[], ]
         elif self.method == 'adjacency_list':
             self.list_dict = {}
 
-    def add_node(self, obj, neighbor_objs=[]):
+    def add_node(self, obj, neighbor_objs=None):
+        if not neighbor_objs:
+            neighbor_objs = []
+        # 从neighbor_objs 里面去除要增加的节点
+        if obj in neighbor_objs:
+            neighbor_objs.remove(obj)
         if obj in self.nodes:
             raise ValueError('图节点已存在，无法插入。')
         else:
             self.nodes.append(obj)  # 加入图节点
             if self.method == 'adjacency_list':
                 self.list_dict[obj] = neighbor_objs
-            # TODO 加入adjacency_matrix 的 add node方法
             elif self.method == 'adjacency_matrix':
-                self.adjacency_matrix.append()
+                obj_index = self.nodes.index(obj)  # 插入节点的index
+                # 判断是否是第一个加入的，如果是第一个加入的，只是一个0的矩阵
+                if not obj_index:
+                    self.adjacency_matrix[0].append(0)
+                else:
+                    for i in self.adjacency_matrix:
+                        i.append(0)
+                    else:
+                        self.adjacency_matrix.append([0 for x in range(obj_index + 1)])
+                    # 加入 neighbor_objs
+                    if neighbor_objs:
+                        index_list = [self.nodes.index(i) for i in neighbor_objs]
+                        for i in index_list:
+                            self.adjacency_matrix[i][obj_index], self.adjacency_matrix[obj_index][i] = 1, 1
 
-    def add_links(self, *args):
-        # 判断对象是否存在, 不在就加入，在就加入弧
-        for i in args:
-            if i not in self.nodes:
-                self.nodes.append(i)
+    def add_links(self, all_links=None, links_list=None):
+        """
+        添加弧，或者叫添加链接关系的方法
+        :param all_links: 具有相连关系的节点, 会两两都会建立节点，相互完全关系
+        :param links_list: 具有节点的list，列表里的每个列表或tuple 为两两具有关系
+        """
+
+        def __add_links_inner(all_links=None):
+            # 判断对象是否存在, 不在就加入，在就加入弧
+            if all_links:
+                for i in all_links:
+                    if i not in self.nodes:
+                        self.nodes.append(i)
+                    if self.method == 'adjacency_list':
+                        if i not in self.list_dict.keys():
+                            self.list_dict[i] = list(all_links).pop(i)
+                        self.list_dict[i] = list(set(list(all_links) + self.list_dict[i])).pop(i)
+                    elif self.method == 'adjacency_matrix':
+                        i_index = all_links.index(i)
+                        index_list = [self.nodes.index(j) for j in all_links[(i_index + 1):]]
+                        for j in index_list:
+                            self.adjacency_matrix[j][i_index], self.adjacency_matrix[i_index][j] = 1, 1
+
+        __add_links_inner(all_links=all_links)
+        if links_list:
+            for i in links_list:
+                __add_links_inner(all_links=i)
+
+    def describe(self, matrix=False):
+        """
+        描述图的函数，形式为节点：连接的节点列表
+        :type matrix: boolean 是否输出矩阵
+        :return:
+        """
+        if matrix:
+            if self.method == 'adjacency_matrix':
+                print(self.adjacency_matrix)
+            else:
+                print('图的类型不是邻接矩阵类型( adjacency_matrix )，无法输出矩阵。')
+        else:
             if self.method == 'adjacency_list':
-                if i not in self.list_dict.keys():
-                    self.list_dict[i] = list(args).pop(i)
-                self.list_dict[i] = list(set(list(args) + self.list_dict[i])).pop(i)
+                for i, k in self.list_dict.items():
+                    print(f'{i}: {k}')
             elif self.method == 'adjacency_matrix':
-                # TODO 加入adjacency_matrix 的 add node方法
-                ...
+                for i in range(len(self.nodes)):
+                    print(f'{self.nodes[i]}: ', end='')
+                    for j in self.adjacency_matrix[i]:
+                        if j:
+                            print(f'{self.nodes[j]}, ', end='')
+                    else:
+                        print()
+
+
+
+if __name__ == '__main__':
+    n = BaseGraph(method='adjacency_matrix')
+    n.add_node(3)
+    # n.add_node(2, [3, ])
+    n.add_node(5)
+    n.add_links(all_links=[5, 3])
+    # TODO 输出的矩阵有问题，是反的，并且link也不对
+    n.describe(matrix=True)
+    n.describe()
