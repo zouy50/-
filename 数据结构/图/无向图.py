@@ -31,6 +31,11 @@ class BaseGraph:
             self.nodes.append(obj)  # 加入图节点
             if self.method == 'adjacency_list':
                 self.list_dict[obj] = neighbor_objs
+                for i in neighbor_objs:     # 加入每个不存在的节点 调用自身，递归
+                    if i not in self.nodes:
+                        self.add_node(i)
+                    if obj not in self.list_dict[i]:    # 因为是无向图互相加入节点
+                        self.list_dict[i].append(obj)
             elif self.method == 'adjacency_matrix':
                 obj_index = self.nodes.index(obj)  # 插入节点的index
                 # 判断是否是第一个加入的，如果是第一个加入的，只是一个0的矩阵
@@ -43,6 +48,9 @@ class BaseGraph:
                         self.adjacency_matrix.append([0 for x in range(obj_index + 1)])
                     # 加入 neighbor_objs
                     if neighbor_objs:
+                        for i in neighbor_objs:
+                            if i not in self.nodes:
+                                self.add_node(i)
                         index_list = [self.nodes.index(i) for i in neighbor_objs]
                         for i in index_list:
                             self.adjacency_matrix[i][obj_index], self.adjacency_matrix[obj_index][i] = 1, 1
@@ -61,14 +69,19 @@ class BaseGraph:
                     if i not in self.nodes:
                         self.nodes.append(i)
                     if self.method == 'adjacency_list':
+                        # 更新节点的邻接列表
                         if i not in self.list_dict.keys():
-                            self.list_dict[i] = list(all_links).pop(i)
-                        self.list_dict[i] = list(set(list(all_links) + self.list_dict[i])).pop(i)
+                            self.list_dict[i] = list(all_links).pop(all_links.index(i))
+                        else:
+                            temp_list = list(set(list(all_links) + self.list_dict[i]))
+                            temp_list.remove(i)
+                            self.list_dict[i] = temp_list
                     elif self.method == 'adjacency_matrix':
                         i_index = all_links.index(i)
                         index_list = [self.nodes.index(j) for j in all_links[(i_index + 1):]]
                         for j in index_list:
-                            self.adjacency_matrix[j][i_index], self.adjacency_matrix[i_index][j] = 1, 1
+                            if j != i_index:    # 相等的不更新成1
+                                self.adjacency_matrix[j][i_index], self.adjacency_matrix[i_index][j] = 1, 1
 
         __add_links_inner(all_links=all_links)
         if links_list:
@@ -83,7 +96,12 @@ class BaseGraph:
         """
         if matrix:
             if self.method == 'adjacency_matrix':
-                print(self.adjacency_matrix)
+                # print(self.adjacency_matrix)
+                for i in self.adjacency_matrix:
+                    # print(i)
+                    for j in i:
+                        print(j, end=' ')
+                    print()
             else:
                 print('图的类型不是邻接矩阵类型( adjacency_matrix )，无法输出矩阵。')
         else:
@@ -93,8 +111,8 @@ class BaseGraph:
             elif self.method == 'adjacency_matrix':
                 for i in range(len(self.nodes)):
                     print(f'{self.nodes[i]}: ', end='')
-                    for j in self.adjacency_matrix[i]:
-                        if j:
+                    for j in range(len(self.adjacency_matrix[i])):
+                        if self.adjacency_matrix[i][j]:
                             print(f'{self.nodes[j]}, ', end='')
                     else:
                         print()
@@ -102,11 +120,12 @@ class BaseGraph:
 
 
 if __name__ == '__main__':
+    # n = BaseGraph(method='adjacency_list')
     n = BaseGraph(method='adjacency_matrix')
     n.add_node(3)
-    # n.add_node(2, [3, ])
+    n.add_node(2, [3, ])
     n.add_node(5)
+    n.add_node(7, neighbor_objs=[5, 6, 8, 10])
     n.add_links(all_links=[5, 3])
-    # TODO 输出的矩阵有问题，是反的，并且link也不对
     n.describe(matrix=True)
     n.describe()
