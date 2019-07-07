@@ -1,9 +1,6 @@
 # author:
 
 
-
-
-
 class BaseGraph:
     """
     基本图的类，具有最简单的图的基本属性
@@ -37,10 +34,10 @@ class BaseGraph:
             self.nodes.append(obj)  # 加入图节点
             if self.method == 'adjacency_list':
                 self.list_dict[obj] = neighbor_objs
-                for i in neighbor_objs:     # 加入每个不存在的节点 调用自身，递归
+                for i in neighbor_objs:  # 加入每个不存在的节点 调用自身，递归
                     if i not in self.nodes:
                         self.add_node(i)
-                    if obj not in self.list_dict[i]:    # 因为是无向图互相加入节点
+                    if obj not in self.list_dict[i]:  # 因为是无向图互相加入节点
                         self.list_dict[i].append(obj)
             elif self.method == 'adjacency_matrix':
                 obj_index = self.nodes.index(obj)  # 插入节点的index
@@ -85,10 +82,11 @@ class BaseGraph:
                     elif self.method == 'adjacency_matrix':
                         # TODO 有bug  无法添加上
                         i_index = all_links.index(i)
-                        index_list = [j for j in all_links[(i_index + 1):]]   # 获取当前节点后面的 节点列表
+                        index_list = [j for j in all_links[(i_index + 1):]]  # 获取当前节点后面的 节点列表
                         for j in index_list:
-                            if j != i:    # 相等的不更新成1
-                                self.adjacency_matrix[self.nodes.index(j)][self.nodes.index(i)], self.adjacency_matrix[self.nodes.index(i)][self.nodes.index(j)] = 1, 1
+                            if j != i:  # 相等的不更新成1
+                                self.adjacency_matrix[self.nodes.index(j)][self.nodes.index(i)], \
+                                self.adjacency_matrix[self.nodes.index(i)][self.nodes.index(j)] = 1, 1
 
         __add_links_inner(all_links=all_links)
         if links_list:
@@ -134,11 +132,36 @@ class BaseGraph:
         ...
 
     def del_nodes(self, *args):
-        ...
+        """
+        此方法用来删除节点，如果是多个参数，就是删除多个节点，
+        删除节点会删除所有的与此节点的链接
+        :param args: 要删除的节点
+        :return: None 会直接在该对象上删除
+        """
+
         def del_node(node):
-            ...
+            # adjacency_list 类型的删除关系
+            if self.method == 'adjacency_list':
+                # 删除其它节点与该节点的关系
+                for i in self.list_dict[node]:
+                    self.list_dict[i].remove(node)
+                # 删除节点与其它节点的关系
+                del self.list_dict[node]
+                # 删除节点
+                self.nodes.remove(node)
+            # TODO 需要写上邻接矩阵删除的方法
+            elif self.method == 'adjacency_matrix':
+                ...
+
+        for i in args:
+            del_node(i)
 
     def del_links(self, *args):
+        """
+
+        :param args:装满关系的列表，
+        :return:
+        """
         # 参数可能是list fill with tuple
         ...
 
@@ -147,12 +170,9 @@ class BaseGraph:
         ...
 
 
-
-
-
 if __name__ == '__main__':
-    # n = BaseGraph(method='adjacency_list')
-    n = BaseGraph(method='adjacency_matrix')
+    n = BaseGraph(method='adjacency_list')
+    # n = BaseGraph(method='adjacency_matrix')
     n.add_node(3)
     n.add_node(2, [3, ])
     n.add_node(5)
@@ -160,4 +180,6 @@ if __name__ == '__main__':
     n.add_links(all_links=[5, 3])
     n.add_links(links_list=[[6, 8], [2, 10]])
     n.describe(matrix=True)
+    n.describe()
+    n.del_nodes(5, 7)
     n.describe()
