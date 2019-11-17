@@ -6,7 +6,7 @@
 <script src="echarts.js"></script>
 <body>
 <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-<div id="main" style="width: 90%;height:600px;">
+<div id="main" style="width: 90%;height:1500px;">
 	
 
 </div>
@@ -32,10 +32,11 @@ myChart.setOption(option = {
 
 			symbol: 'emptyCircle',
 
-			orient: 'horizontal',
+			orient: 'vertical',
 
 			expandAndCollapse: true,
 
+            initialTreeDepth: 7,
 			label: {
 				normal: {
 					position: 'top',
@@ -50,7 +51,7 @@ myChart.setOption(option = {
 				label: {
 					normal: {
 						position: 'bottom',
-						rotate: 0,
+						rotate: -90,
 						verticalAlign: 'middle',
 						align: 'left'
 					}
