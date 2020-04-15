@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="main" style="width: 100%;height:600px;"></div>
+
+</body>
+<script src="./curve_files/echarts_min.js.下载"></script>
+<script src="./curve_files/jquery-3.3.1.js.下载"></script>
+<script>
+    function get_option(json_data){
+        // 用来生成 图所需要的数据
+        let indicator = [];
+        for(let i=0;i<=json_data.performance_title.length;i++){
+            indicator.push({name: json_data.performance_title[i], max: json_data.performance_max[i], min: json_data.performance_min[i]});
+        }
+        option = {
+            radar: {
+                indicator: indicator
+            },
+            series: [{
+                type: 'radar',
+                areaStyle: {color: 'red', opacity: 0.25},
+                data: [
+                    {
+                        value: json_data.performance,
+                    }
+                ]
+            }]
+        };
+        return option
+    }
+    lp_perdormance_json = JSON.parse(`{"lp_id": 123, "lp_name": "张三",
+    "performance_title": ["课消", "出单", "通时", "节点", "退费"],
+    "performance_max": [50, 30, 15, 5, 0],
+    "performance_min": [0, 0, 0, 0, -5],
+     "performance": [23.3, 30, 12.3, 1.2, -1]}`);
+    let myChart = echarts.init(document.getElementById('main'), 'dark');
+    myChart.setOption(get_option(lp_perdormance_json))
+</script>
+</html>

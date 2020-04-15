@@ -120,6 +120,18 @@ var data = {
              {name: ".其它.."},
          ]},
         {name: "课消分析"},
+        {name: "节点问题"},
         {name: "最近联系天数分析"},
     ]
 };
+
+
+
+var lp_data = {
+    name: LP,
+    children: [
+        {name: "必要工作", children: [
+
+            ]}
+    ]
+}
